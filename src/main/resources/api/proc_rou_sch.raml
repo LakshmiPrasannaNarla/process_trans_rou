@@ -1,0 +1,54 @@
+#%RAML 1.0
+title: Proc_rou_sch
+/booking:
+  /{transportType}:
+    /routes:
+      get:
+        headers:
+          transactionid:
+            type: string
+            required: true
+        queryParameters:
+          companycode:
+            type: string
+            required: false
+          departurelocationcode:
+            type: string
+            required: false
+          destinationlocationcode:
+            type: string
+            required: false
+        responses:
+          200:
+            body:
+              application/json:
+                example: !include /Proc/rou.raml
+    /schedules:
+      get:
+        headers:
+           transactionid:
+             type: string
+             required: true
+        queryParameters:
+           companycode:
+             type: string
+             required: false
+           departurelocationcode:
+             type: string
+             required: false
+           destinationlocationcode:
+             type: string
+             required: false
+           requestTimezone:
+             type: string
+             required: false
+        responses:
+          200:
+            body:
+              application/json:
+                example: !include /Proc/sch.raml
+                  
+            
+             
+          
+       

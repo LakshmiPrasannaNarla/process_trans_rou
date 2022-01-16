@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="320e9a4b-a38e-4beb-8c04-0b2aefc63beb" >
+		<http:request-connection host="localhost" port="8083" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="8083cf24-e22a-465d-a9be-7e444d3b6b24" >
+		<http:request-connection host="localhost" port="8087" />
+	</http:request-config>
+	<flow name="Process_transportconfFlow" doc:id="0d30c7a9-017e-480c-bb58-964f0f194c20" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="b0508643-b7ee-4e74-a30a-4cd4c2295d6b" >
+			<route >
+				<http:request method="GET" doc:name="TravelOnTripRequest" doc:id="dcc0b3e3-293d-4c29-b5ee-9d872dff8201" path="/api/{transportType}/{transportCompany}/routes" config-ref="HTTP_Request_configuration">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"transactionid" : attributes.headers.transactionid
+}]]]></http:headers>
+					<http:uri-params ><![CDATA[#[{
+	"transportType": attributes.uriParams.transportType,
+	"transportCompany" : attributes.queryParams.companycode
+}]]]></http:uri-params>
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"departurelocationcode" : attributes.queryParams.departurelocationcode,
+	"destinationlocationcode" : attributes.queryParams.destinationlocationcode
+}]]]></http:query-params>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="bceb5e73-7280-4e54-ade4-37f90bb34f65" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route >
+				<http:request method="GET" doc:name="Requestfastgo" doc:id="567d8364-ce59-4092-b76d-54a7e02f8218" path="/api/{transportType}/{transportCompany}/routes" config-ref="HTTP_Request_configuration1">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"transactionid" : attributes.headers.transactionid
+}]]]></http:headers>
+					<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"transportCompany" : attributes.queryParams.companycode ,
+	"transportType" : attributes.uriParams.transportType
+}]]]></http:uri-params>
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"departurelocationcode" : attributes.queryParams.departurelocationcode,
+	"destinationlocationcode" : attributes.queryParams.destinationlocationcode
+}]]]></http:query-params>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="148403aa-edd8-4330-b711-228c6cde0901">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="09051051-3350-4412-9539-a9151828ad64" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload..payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="Process_transportconfFlow1" doc:id="d85ef17c-edf8-4ce7-9ac8-779bd0d73b81" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="6de96092-b019-49f1-86fd-6d1b76e1618b" >
+			<route >
+				<http:request method="GET" doc:name="Requesttravelontrip" doc:id="6841e80a-f92a-4736-978a-67c747610c03" config-ref="HTTP_Request_configuration" path="/api/{transportType}/{transportCompany}/schedules">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"transactionid" : attributes.headers.transactionid
+}]]]></http:headers>
+					<http:uri-params ><![CDATA[#[{
+	"transportType": attributes.uriParams.transportType,
+	"transportCompany" : attributes.queryParams.companycode
+}]]]></http:uri-params>
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"departurelocationcode" : attributes.queryParams.departurelocationcode,
+	"destinationlocationcode" : attributes.queryParams.destinationlocationcode
+}]]]></http:query-params>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="3e2d0dc9-f092-4a99-b499-93d0d5b64878">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route >
+				<http:request method="GET" doc:name="Requestfastgo" doc:id="012a7e2a-feb9-4695-8626-d35667423878" config-ref="HTTP_Request_configuration1" path="/api/{transportType}/{transportCompany}/schedules">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"transactionid" : attributes.headers.transactionid
+}]]]></http:headers>
+					<http:uri-params ><![CDATA[#[{
+	"transportType": attributes.uriParams.transportType,
+	"transportCompany" : attributes.queryParams.companycode
+}]]]></http:uri-params>
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"departurelocationcode" : attributes.queryParams.departurelocationcode,
+	"destinationlocationcode" : attributes.queryParams.destinationlocationcode
+}]]]></http:query-params>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="cf8964a8-08fd-4d12-b811-69082fe696b2">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="00d4bb20-19f4-42b9-bce0-604343bcaf26" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload..payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
